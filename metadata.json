@@ -1,0 +1,6 @@
+{
+  "name": "Kube Identity Editor",
+  "description": "A visual editor for creating Kubernetes Service Accounts, Users, and Groups with real-time YAML generation.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}

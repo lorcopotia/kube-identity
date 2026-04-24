@@ -1,0 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-bento-bg: #f5f5f7;
+  --color-bento-card: #ffffff;
+  --color-bento-accent: #2563eb;
+  --color-bento-text-main: #1d1d1f;
+  --color-bento-text-sec: #6e6e73;
+  --color-bento-border: #e5e7eb;
+}
+
+@layer base {
+  body {
+    @apply bg-bento-bg text-bento-text-main font-sans antialiased;
+  }
+}
