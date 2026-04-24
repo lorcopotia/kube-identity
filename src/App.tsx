@@ -137,6 +137,33 @@ export default function App() {
     return documents.map(doc => yaml.dump(doc, { indent: 2, noRefs: true })).join("---\n");
   }, [state]);
 
+  const kubectlCommand = useMemo(() => {
+    const bindingType = state.isClusterRole ? "clusterrolebinding" : "rolebinding";
+    const roleType = state.isClusterRole ? "clusterrole" : "role";
+    const subjectPrefix = state.type === "ServiceAccount" ? "serviceaccount" : state.type.toLowerCase();
+    const subjectValue = state.type === "ServiceAccount" ? `${state.namespace}:${state.name}` : state.name;
+    
+    const namespaceFlag = !state.isClusterRole ? ` -n ${state.namespace}` : "";
+    
+    return `kubectl create ${bindingType} ${state.name}-${state.roleName}-binding --${roleType}=${state.roleName} --${subjectPrefix}=${subjectValue}${namespaceFlag}`;
+  }, [state]);
+
+  const securityInsights = useMemo(() => {
+    const warnings: string[] = [];
+    state.rules.forEach((rule, idx) => {
+      const verbs = rule.verbs.split(",").map(v => v.trim());
+      const resources = rule.resources.split(",").map(r => r.trim());
+      
+      if (verbs.includes("*")) {
+        warnings.push(`Rule #${idx + 1}: Using '*' in verbs is dangerous. Consider specifying only 'get', 'list', etc.`);
+      }
+      if (resources.includes("*")) {
+        warnings.push(`Rule #${idx + 1}: Access to all resources ('*') is very broad.`);
+      }
+    });
+    return warnings;
+  }, [state.rules]);
+
   const handleCopy = () => {
     navigator.clipboard.writeText(generateYaml);
     setCopied(true);
@@ -288,8 +315,13 @@ export default function App() {
                 />
               </div>
               <div className="space-y-4">
-                <label className="text-sm font-bold text-bento-text-main flex items-center gap-2">
-                  Role Attribution
+                <label className="text-sm font-bold text-bento-text-main flex items-center justify-between">
+                  <span>Role Attribution</span>
+                  <span className="text-[10px] text-bento-text-sec italic font-normal">
+                    {state.isClusterRole 
+                      ? "ClusterRole: Shared across the whole cluster." 
+                      : "Role: Limited to the namespace."}
+                  </span>
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -310,6 +342,9 @@ export default function App() {
                     Cluster
                   </button>
                 </div>
+                <p className="text-[10px] text-bento-text-sec leading-tight">
+                  <span className="font-bold text-bento-accent">Scope Guide:</span> Use <b>Role</b> for specific resources within a namespace (e.g., pods in 'default'). Use <b>ClusterRole</b> for nodes, namespaces, or shared cluster-wide resources.
+                </p>
               </div>
             </div>
           </div>
@@ -473,32 +508,57 @@ export default function App() {
           variants={itemVariants}
           className="md:col-span-1 bg-neutral-900 text-white rounded-[24px] p-6 border border-zinc-800 shadow-sm flex flex-col"
         >
-          <div className="flex items-center gap-2 mb-4">
-            <Terminal className="w-4 h-4 text-zinc-500" />
-            <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">Quick Deploy</span>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Terminal className="w-4 h-4 text-zinc-500" />
+              <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-bold">CLI Command</span>
+            </div>
+            <button 
+              onClick={() => navigator.clipboard.writeText(kubectlCommand)}
+              className="p-1.5 hover:bg-zinc-800 rounded-lg transition-colors text-zinc-500"
+            >
+              <Copy className="w-3.5 h-3.5" />
+            </button>
           </div>
-          <code className="bg-black/50 p-4 rounded-xl text-[11px] text-zinc-400 border border-zinc-700/50 block mb-4 font-mono">
-            kubectl apply -f manifest.yaml
-          </code>
+          <div className="bg-black/50 p-4 rounded-xl text-[11px] text-zinc-400 border border-zinc-700/50 block mb-4 font-mono break-all leading-relaxed">
+            {kubectlCommand}
+          </div>
           <p className="text-[10px] text-zinc-500 leading-relaxed italic">
-            Ensures rbac.authorization.k8s.io/v1 compatibility.
+            Command to create the binding without applying the full YAML.
           </p>
         </motion.section>
 
         <motion.section 
           variants={itemVariants}
-          className="md:col-span-1 bg-bento-card rounded-[24px] p-6 px-8 border border-bento-border shadow-sm flex items-center justify-between"
+          className="md:col-span-1 bg-bento-card rounded-[24px] p-6 px-8 border border-bento-border shadow-sm flex flex-col justify-center"
         >
-          <div className="flex items-center gap-4">
-            <ShieldCheck className="w-6 h-6 text-emerald-500" />
+          <div className="flex items-center gap-4 mb-3">
+            <ShieldCheck className={`w-6 h-6 ${securityInsights.length > 0 ? "text-amber-500" : "text-emerald-500"}`} />
             <div>
               <p className="text-xs font-bold uppercase tracking-tight">Security Audit</p>
-              <p className="text-[10px] text-bento-text-sec">Manifest is valid and follows best practices.</p>
+              <p className="text-[10px] text-bento-text-sec">
+                {securityInsights.length > 0 
+                  ? "Potential vulnerabilities found." 
+                  : "Manifest validated successfully."}
+              </p>
             </div>
           </div>
-          <button className="bg-bento-text-main text-white p-3 rounded-xl hover:opacity-90 transition-opacity">
-            <Download className="w-4 h-4" />
-          </button>
+          {securityInsights.length > 0 && (
+            <div className="space-y-1">
+              {securityInsights.map((insight, i) => (
+                <p key={i} className="text-[9px] text-amber-600 font-medium leading-tight bg-amber-50 p-1.5 rounded-lg border border-amber-100 italic">
+                  {insight}
+                </p>
+              ))}
+            </div>
+          )}
+          {securityInsights.length === 0 && (
+            <div className="mt-2 bg-emerald-50 p-2 rounded-xl border border-emerald-100">
+              <p className="text-[9px] text-emerald-700 font-medium leading-tight">
+                Complies with the <b>Principle of Least Privilege</b>.
+              </p>
+            </div>
+          )}
         </motion.section>
       </motion.div>
 
