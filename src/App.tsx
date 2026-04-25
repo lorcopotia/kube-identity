@@ -62,6 +62,7 @@ export default function App() {
   });
 
   const [copied, setCopied] = useState(false);
+  const [activeTab, setActiveTab] = useState<"editor" | "raw" | "settings">("editor");
 
   const generateYaml = useMemo(() => {
     const documents: any[] = [];
@@ -228,14 +229,17 @@ export default function App() {
   return (
     <div className="min-h-screen p-4 md:p-8 bg-bento-bg text-bento-text-main font-sans selection:bg-bento-accent/20">
       <motion.div 
+        key={activeTab}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
         className="max-w-7xl mx-auto h-full grid grid-cols-1 md:grid-cols-[320px_1fr_400px] gap-5"
       >
-        {/* SIDEBAR / LOGO & TYPE SELECTION */}
-        <motion.aside 
-          variants={itemVariants}
+        {activeTab === "editor" ? (
+          <>
+            {/* SIDEBAR / LOGO & TYPE SELECTION */}
+            <motion.aside 
+              variants={itemVariants}
           className="md:row-span-4 bg-bento-card rounded-[24px] p-8 border border-bento-border flex flex-col shadow-sm"
         >
           <div className="flex items-center gap-3 mb-10">
@@ -563,7 +567,109 @@ export default function App() {
             </div>
           )}
         </motion.section>
-      </motion.div>
+      </>
+    ) : activeTab === "raw" ? (
+      <motion.section 
+        variants={itemVariants}
+        className="md:col-span-3 bg-bento-card rounded-[32px] border border-bento-border shadow-sm flex flex-col overflow-hidden min-h-[600px]"
+      >
+        <div className="p-8 border-b border-bento-border flex items-center justify-between bg-neutral-50/50">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-bento-accent text-white rounded-xl flex items-center justify-center">
+              <CodeIcon className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold">Unfiltered YAML</h2>
+              <p className="text-xs text-bento-text-sec">Complete manifest output</p>
+            </div>
+          </div>
+          <button 
+            onClick={handleCopy}
+            className="px-6 py-3 bg-bento-text-main text-white rounded-xl shadow-lg font-bold text-sm flex items-center gap-2 transition-all active:scale-95"
+          >
+            {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+            {copied ? "Copied to Clipboard" : "Copy Everything"}
+          </button>
+        </div>
+        <div className="flex-1 bg-[#0d1117] p-10 font-mono text-[14px] leading-relaxed relative overflow-auto">
+          <pre className="text-[#c9d1d9] whitespace-pre">
+            {generateYaml}
+          </pre>
+        </div>
+      </motion.section>
+    ) : (
+      <motion.section 
+        variants={itemVariants}
+        className="md:col-span-3 bg-bento-card rounded-[32px] border border-bento-border shadow-sm p-10"
+      >
+        <div className="max-w-2xl mx-auto space-y-12 py-10">
+          <div className="text-center space-y-3">
+            <div className="w-16 h-16 bg-neutral-100 rounded-3xl flex items-center justify-center mx-auto mb-6 text-bento-text-sec">
+              <Settings className="w-8 h-8" />
+            </div>
+            <h2 className="text-3xl font-bold tracking-tight">Application Settings</h2>
+            <p className="text-bento-text-sec">Configure your global RBAC workspace preferences.</p>
+          </div>
+
+          <div className="grid grid-cols-1 gap-6">
+            <div className="p-6 bg-neutral-50 rounded-2xl border border-bento-border space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm">Real-time Validation</h3>
+                  <p className="text-xs text-bento-text-sec">Run safety checks while you type</p>
+                </div>
+                <div className="w-12 h-6 bg-bento-accent rounded-full flex items-center p-1 cursor-pointer">
+                  <div className="w-4 h-4 bg-white rounded-full ml-auto shadow-sm" />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-neutral-50 rounded-2xl border border-bento-border space-y-4 opacity-50 relative group">
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-[1px] rounded-2xl">
+                <span className="bg-bento-text-main text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg">Coming Soon</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm">Export Pro</h3>
+                  <p className="text-xs text-bento-text-sec">Direct export to GitHub, GitLab or Bitbucket</p>
+                </div>
+                <div className="w-12 h-6 bg-neutral-200 rounded-full flex items-center p-1">
+                  <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-6 bg-neutral-50 rounded-2xl border border-bento-border space-y-4 opacity-50 relative group">
+              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-[1px] rounded-2xl">
+                <span className="bg-bento-text-main text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg">Coming Soon</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-bold text-sm">Dark Mode</h3>
+                  <p className="text-xs text-bento-text-sec">Native UI theme switching</p>
+                </div>
+                <div className="w-12 h-6 bg-neutral-200 rounded-full flex items-center p-1">
+                  <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="pt-10 border-t border-bento-border flex flex-col items-center gap-4">
+            <p className="text-[11px] text-bento-text-sec uppercase font-bold tracking-widest leading-none">Powered by Kubernetes v1.28+</p>
+            <div className="flex gap-6">
+              <button 
+                onClick={() => setActiveTab("editor")}
+                className="text-sm font-bold text-bento-accent hover:underline"
+              >
+                Back to Editor
+              </button>
+            </div>
+          </div>
+        </div>
+      </motion.section>
+      )}
+    </motion.div>
 
       {/* NEW PROFESSIONAL FOOTER */}
       <motion.footer 
@@ -613,18 +719,27 @@ export default function App() {
 
       {/* FOOTER NAV / SETTINGS */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md border border-bento-border rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-6 md:gap-10">
-        <button className="flex flex-col items-center gap-1 group">
-          <Layers className="w-5 h-5 text-bento-accent" />
-          <span className="text-[9px] font-bold uppercase tracking-tighter text-bento-accent">Editor</span>
+        <button 
+          onClick={() => setActiveTab("editor")}
+          className={`flex flex-col items-center gap-1 group transition-all ${activeTab === "editor" ? "text-bento-accent" : "opacity-40 hover:opacity-100"}`}
+        >
+          <Layers className="w-5 h-5 flex-shrink-0" />
+          <span className={`text-[9px] font-bold uppercase tracking-tighter ${activeTab === "editor" ? "text-bento-accent" : ""}`}>Editor</span>
         </button>
-        <button className="flex flex-col items-center gap-1 group opacity-40 hover:opacity-100 transition-opacity">
-          <CodeIcon className="w-5 h-5" />
-          <span className="text-[9px] font-bold uppercase tracking-tighter">Raw View</span>
+        <button 
+          onClick={() => setActiveTab("raw")}
+          className={`flex flex-col items-center gap-1 group transition-all ${activeTab === "raw" ? "text-bento-accent" : "opacity-40 hover:opacity-100"}`}
+        >
+          <CodeIcon className="w-5 h-5 flex-shrink-0" />
+          <span className={`text-[9px] font-bold uppercase tracking-tighter ${activeTab === "raw" ? "text-bento-accent" : ""}`}>Raw View</span>
         </button>
         <div className="w-px h-6 bg-bento-border" />
-        <button className="flex flex-col items-center gap-1 group opacity-40 hover:opacity-100 transition-opacity">
-          <Settings className="w-5 h-5" />
-          <span className="text-[9px] font-bold uppercase tracking-tighter">Settings</span>
+        <button 
+          onClick={() => setActiveTab("settings")}
+          className={`flex flex-col items-center gap-1 group transition-all ${activeTab === "settings" ? "text-bento-accent" : "opacity-40 hover:opacity-100"}`}
+        >
+          <Settings className="w-5 h-5 flex-shrink-0" />
+          <span className={`text-[9px] font-bold uppercase tracking-tighter ${activeTab === "settings" ? "text-bento-accent" : ""}`}>Settings</span>
         </button>
       </div>
     </div>
