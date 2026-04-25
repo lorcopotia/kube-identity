@@ -1,6 +1,6 @@
 {
-  "name": "Kube Identity Editor",
-  "description": "A visual editor for creating Kubernetes Service Accounts, Users, and Groups with real-time YAML generation.",
+  "name": "KubeIdentity",
+  "description": "Professional Kubernetes RBAC manifest generator for creating ServiceAccounts, Users, and Groups with real-time YAML generation.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }
