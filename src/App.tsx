@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { 
   User, 
@@ -21,7 +21,9 @@ import {
   FileCode,
   ExternalLink,
   Github,
-  Award
+  Award,
+  Moon,
+  Sun
 } from "lucide-react";
 import yaml from "js-yaml";
 
@@ -63,6 +65,24 @@ export default function App() {
 
   const [copied, setCopied] = useState(false);
   const [activeTab, setActiveTab] = useState<"editor" | "raw" | "settings">("editor");
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem("kube-identity-theme") === "dark" || 
+        (!localStorage.getItem("kube-identity-theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    if (darkMode) {
+      root.classList.add("dark");
+      localStorage.setItem("kube-identity-theme", "dark");
+    } else {
+      root.classList.remove("dark");
+      localStorage.setItem("kube-identity-theme", "light");
+    }
+  }, [darkMode]);
 
   const generateYaml = useMemo(() => {
     const documents: any[] = [];
@@ -263,7 +283,7 @@ export default function App() {
                     className={`flex items-center gap-3 p-3 rounded-xl text-sm font-semibold transition-all ${
                       state.type === type 
                         ? "bg-bento-accent text-white shadow-md shadow-bento-accent/20" 
-                        : "bg-[#f0f0f2] text-bento-text-sec hover:bg-gray-200"
+                        : "bg-bento-bg text-bento-text-sec hover:bg-neutral-200 dark:hover:bg-neutral-800"
                     }`}
                   >
                     {type === "ServiceAccount" && <Layers className="w-4 h-4" />}
@@ -284,19 +304,30 @@ export default function App() {
                 type="text"
                 value={state.namespace}
                 onChange={(e) => setState(s => ({ ...s, namespace: e.target.value }))}
-                className="w-full bg-[#f5f5f7] border border-bento-border p-3 rounded-xl text-sm focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
+                className="w-full bg-bento-bg border border-bento-border p-3 rounded-xl text-sm focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
                 placeholder="namespace..."
               />
             </div>
           </div>
 
-          <div className="mt-auto pt-6">
-            <div className="bg-emerald-50 rounded-2xl p-4 border border-emerald-100">
+          <div className="mt-auto pt-6 space-y-4">
+            <button 
+              onClick={() => setDarkMode(!darkMode)}
+              className="w-full flex items-center justify-between p-3 px-4 bg-bento-bg rounded-xl text-[13px] font-semibold transition-colors hover:bg-neutral-200 dark:hover:bg-neutral-800"
+            >
+              <span className="flex items-center gap-2">
+                {darkMode ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
+                Theme
+              </span>
+              <span className="text-bento-accent">{darkMode ? "Dark" : "Light"}</span>
+            </button>
+
+            <div className="bg-bento-bg rounded-2xl p-4 border border-bento-border shadow-sm">
               <div className="flex items-center gap-2 mb-1">
                 <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-widest">Live Engine</span>
+                <span className="text-[10px] font-bold text-bento-text-sec uppercase tracking-widest">Live Engine</span>
               </div>
-              <p className="text-[11px] text-emerald-600/80 leading-relaxed font-medium">Manifests are generated in real-time as you type.</p>
+              <p className="text-[11px] text-bento-text-sec/80 leading-relaxed font-medium">Manifests are generated in real-time as you type.</p>
             </div>
           </div>
         </motion.aside>
@@ -304,7 +335,7 @@ export default function App() {
         {/* MAIN EDITOR HERO */}
         <motion.section 
           variants={itemVariants}
-          className="md:col-span-2 bg-gradient-to-br from-white to-neutral-50 rounded-[24px] p-8 md:p-10 border border-bento-border shadow-sm flex flex-col"
+          className="md:col-span-2 bg-bento-card rounded-[24px] p-8 md:p-10 border border-bento-border shadow-sm flex flex-col"
         >
           <div className="mb-10">
             <span className="text-[11px] uppercase tracking-widest text-bento-text-sec font-bold mb-3 block">Basic Configuration</span>
@@ -317,7 +348,7 @@ export default function App() {
                   type="text"
                   value={state.name}
                   onChange={(e) => setState(s => ({ ...s, name: e.target.value }))}
-                  className="w-full bg-white border border-bento-border p-4 rounded-2xl text-lg font-medium shadow-sm transition-all focus:ring-4 focus:ring-bento-accent/10 focus:border-bento-accent focus:outline-none"
+                  className="w-full bg-bento-bg border border-bento-border p-4 rounded-2xl text-lg font-medium shadow-sm transition-all focus:ring-4 focus:ring-bento-accent/10 focus:border-bento-accent focus:outline-none"
                   placeholder="e.g. build-bot"
                 />
               </div>
@@ -335,15 +366,15 @@ export default function App() {
                     type="text"
                     value={state.roleName}
                     onChange={(e) => setState(s => ({ ...s, roleName: e.target.value }))}
-                    className="flex-1 bg-white border border-bento-border p-4 rounded-2xl text-lg font-medium shadow-sm transition-all focus:ring-4 focus:ring-bento-accent/10 focus:border-bento-accent focus:outline-none font-mono"
+                    className="flex-1 bg-bento-bg border border-bento-border p-4 rounded-2xl text-lg font-medium shadow-sm transition-all focus:ring-4 focus:ring-bento-accent/10 focus:border-bento-accent focus:outline-none font-mono"
                     placeholder="view..."
                   />
                   <button
                     onClick={() => setState(s => ({ ...s, isClusterRole: !s.isClusterRole }))}
                     className={`px-4 rounded-2xl font-bold text-[10px] uppercase tracking-tighter transition-all border ${
                       state.isClusterRole 
-                        ? "bg-bento-text-main text-white border-bento-text-main" 
-                        : "bg-white text-bento-text-sec border-bento-border hover:bg-neutral-50"
+                        ? "bg-bento-text-main text-bento-card border-bento-text-main" 
+                        : "bg-bento-card text-bento-text-sec border-bento-border hover:bg-bento-bg"
                     }`}
                   >
                     Cluster
@@ -383,14 +414,14 @@ export default function App() {
                         value={l.key}
                         onChange={(e) => updateLabel(l.id, "key", e.target.value)}
                         placeholder="key"
-                        className="flex-1 bg-white/50 border border-bento-border p-3 rounded-xl text-sm focus:ring-2 focus:ring-bento-accent/20 focus:outline-none font-mono"
+                        className="flex-1 bg-bento-bg border border-bento-border p-3 rounded-xl text-sm focus:ring-2 focus:ring-bento-accent/20 focus:outline-none font-mono"
                       />
                       <input
                         type="text"
                         value={l.value}
                         onChange={(e) => updateLabel(l.id, "value", e.target.value)}
                         placeholder="value"
-                        className="flex-1 bg-white/50 border border-bento-border p-3 rounded-xl text-sm focus:ring-2 focus:ring-bento-accent/20 focus:outline-none font-mono"
+                        className="flex-1 bg-bento-bg border border-bento-border p-3 rounded-xl text-sm focus:ring-2 focus:ring-bento-accent/20 focus:outline-none font-mono"
                       />
                       <button 
                         onClick={() => removeLabel(l.id)}
@@ -428,7 +459,7 @@ export default function App() {
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="bg-white/40 p-5 rounded-2xl border border-bento-border relative group"
+                      className="bg-bento-card p-5 rounded-2xl border border-bento-border relative group shadow-sm"
                     >
                       <button 
                         onClick={() => removeRule(r.id)}
@@ -445,7 +476,7 @@ export default function App() {
                             value={r.apiGroups}
                             onChange={(e) => updateRule(r.id, "apiGroups", e.target.value)}
                             placeholder='(e.g., "", "apps")'
-                            className="w-full bg-white border border-bento-border p-2.5 rounded-xl text-xs font-mono focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
+                            className="w-full bg-bento-bg border border-bento-border p-2.5 rounded-xl text-xs font-mono focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
                           />
                         </div>
                         <div className="space-y-2">
@@ -455,7 +486,7 @@ export default function App() {
                             value={r.resources}
                             onChange={(e) => updateRule(r.id, "resources", e.target.value)}
                             placeholder="pods, deployments..."
-                            className="w-full bg-white border border-bento-border p-2.5 rounded-xl text-xs font-mono focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
+                            className="w-full bg-bento-bg border border-bento-border p-2.5 rounded-xl text-xs font-mono focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
                           />
                         </div>
                         <div className="space-y-2">
@@ -465,7 +496,7 @@ export default function App() {
                             value={r.verbs}
                             onChange={(e) => updateRule(r.id, "verbs", e.target.value)}
                             placeholder="get, list, watch..."
-                            className="w-full bg-white border border-bento-border p-2.5 rounded-xl text-xs font-mono focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
+                            className="w-full bg-bento-bg border border-bento-border p-2.5 rounded-xl text-xs font-mono focus:ring-2 focus:ring-bento-accent/20 focus:outline-none"
                           />
                         </div>
                       </div>
@@ -487,14 +518,14 @@ export default function App() {
           variants={itemVariants}
           className="md:row-span-4 bg-bento-card rounded-[24px] border border-bento-border shadow-sm flex flex-col overflow-hidden"
         >
-          <div className="p-5 border-b border-bento-border flex items-center justify-between bg-neutral-50/50">
+          <div className="p-5 border-b border-bento-border flex items-center justify-between bg-bento-bg/50">
             <div className="flex items-center gap-2">
               <FileCode className="w-4 h-4 text-bento-text-sec" />
               <span className="text-[11px] uppercase tracking-widest text-bento-text-sec font-bold">YAML Manifest</span>
             </div>
             <button 
               onClick={handleCopy}
-              className="p-2 bg-white border border-bento-border rounded-lg shadow-sm font-bold text-[10px] flex items-center gap-1.5 transition-all active:scale-95 uppercase tracking-tight"
+              className="p-2 bg-bento-card border border-bento-border rounded-lg shadow-sm font-bold text-[10px] flex items-center gap-1.5 transition-all active:scale-95 uppercase tracking-tight"
             >
               {copied ? <Check className="w-3 h-3 text-emerald-500" /> : <Copy className="w-3 h-3 text-bento-text-sec" />}
               {copied ? "Copied" : "Copy"}
@@ -553,15 +584,15 @@ export default function App() {
           {securityInsights.length > 0 && (
             <div className="space-y-1">
               {securityInsights.map((insight, i) => (
-                <p key={i} className="text-[9px] text-amber-600 font-medium leading-tight bg-amber-50 p-1.5 rounded-lg border border-amber-100 italic">
+                <p key={i} className="text-[9px] text-amber-600 dark:text-amber-400 font-medium leading-tight bg-bento-bg p-2 rounded-lg border border-bento-border italic">
                   {insight}
                 </p>
               ))}
             </div>
           )}
           {securityInsights.length === 0 && (
-            <div className="mt-2 bg-emerald-50 p-2 rounded-xl border border-emerald-100">
-              <p className="text-[9px] text-emerald-700 font-medium leading-tight">
+            <div className="mt-2 bg-bento-bg p-2 rounded-xl border border-bento-border">
+              <p className="text-[9px] text-emerald-600 dark:text-emerald-400 font-medium leading-tight">
                 Complies with the <b>Principle of Least Privilege</b>.
               </p>
             </div>
@@ -573,7 +604,7 @@ export default function App() {
         variants={itemVariants}
         className="md:col-span-3 bg-bento-card rounded-[32px] border border-bento-border shadow-sm flex flex-col overflow-hidden min-h-[600px]"
       >
-        <div className="p-8 border-b border-bento-border flex items-center justify-between bg-neutral-50/50">
+        <div className="p-8 border-b border-bento-border flex items-center justify-between bg-bento-bg/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-bento-accent text-white rounded-xl flex items-center justify-center">
               <CodeIcon className="w-5 h-5" />
@@ -585,7 +616,7 @@ export default function App() {
           </div>
           <button 
             onClick={handleCopy}
-            className="px-6 py-3 bg-bento-text-main text-white rounded-xl shadow-lg font-bold text-sm flex items-center gap-2 transition-all active:scale-95"
+            className="px-6 py-3 bg-bento-accent text-white rounded-xl shadow-lg font-bold text-sm flex items-center gap-2 transition-all active:scale-95 hover:brightness-110"
           >
             {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
             {copied ? "Copied to Clipboard" : "Copy Everything"}
@@ -604,7 +635,7 @@ export default function App() {
       >
         <div className="max-w-2xl mx-auto space-y-12 py-10">
           <div className="text-center space-y-3">
-            <div className="w-16 h-16 bg-neutral-100 rounded-3xl flex items-center justify-center mx-auto mb-6 text-bento-text-sec">
+            <div className="w-16 h-16 bg-bento-bg rounded-3xl flex items-center justify-center mx-auto mb-6 text-bento-text-sec">
               <Settings className="w-8 h-8" />
             </div>
             <h2 className="text-3xl font-bold tracking-tight">Application Settings</h2>
@@ -612,7 +643,7 @@ export default function App() {
           </div>
 
           <div className="grid grid-cols-1 gap-6">
-            <div className="p-6 bg-neutral-50 rounded-2xl border border-bento-border space-y-4">
+            <div className="p-6 bg-bento-bg rounded-2xl border border-bento-border space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm">Real-time Validation</h3>
@@ -624,7 +655,7 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-6 bg-neutral-50 rounded-2xl border border-bento-border space-y-4 opacity-50 relative group">
+            <div className="p-6 bg-bento-bg rounded-2xl border border-bento-border space-y-4 opacity-50 relative group">
               <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-[1px] rounded-2xl">
                 <span className="bg-bento-text-main text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg">Coming Soon</span>
               </div>
@@ -639,18 +670,22 @@ export default function App() {
               </div>
             </div>
 
-            <div className="p-6 bg-neutral-50 rounded-2xl border border-bento-border space-y-4 opacity-50 relative group">
-              <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-white/20 backdrop-blur-[1px] rounded-2xl">
-                <span className="bg-bento-text-main text-white text-[10px] uppercase font-bold px-3 py-1 rounded-full shadow-lg">Coming Soon</span>
-              </div>
+            <div className="p-6 bg-bento-bg rounded-2xl border border-bento-border space-y-4">
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-bold text-sm">Dark Mode</h3>
                   <p className="text-xs text-bento-text-sec">Native UI theme switching</p>
                 </div>
-                <div className="w-12 h-6 bg-neutral-200 rounded-full flex items-center p-1">
-                  <div className="w-4 h-4 bg-white rounded-full shadow-sm" />
-                </div>
+                <button 
+                  onClick={() => setDarkMode(!darkMode)}
+                  className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer transition-colors ${darkMode ? "bg-bento-accent" : "bg-neutral-300"}`}
+                >
+                  <motion.div 
+                    animate={{ x: darkMode ? 24 : 0 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    className="w-4 h-4 bg-white rounded-full shadow-sm"
+                  />
+                </button>
               </div>
             </div>
           </div>
@@ -680,7 +715,7 @@ export default function App() {
       >
         <div className="space-y-4 max-w-sm">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-bento-text-main rounded-lg flex items-center justify-center text-white">
+            <div className="w-8 h-8 bg-bento-text-main rounded-lg flex items-center justify-center text-bento-card shadow-lg shadow-bento-text-main/10">
               <ShieldCheck className="w-4 h-4" />
             </div>
             <span className="font-bold tracking-tight">KubeIdentity</span>
@@ -718,7 +753,7 @@ export default function App() {
       </motion.footer>
 
       {/* FOOTER NAV / SETTINGS */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md border border-bento-border rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-6 md:gap-10">
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-bento-card/80 backdrop-blur-md border border-bento-border rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-6 md:gap-10">
         <button 
           onClick={() => setActiveTab("editor")}
           className={`flex flex-col items-center gap-1 group transition-all ${activeTab === "editor" ? "text-bento-accent" : "opacity-40 hover:opacity-100"}`}

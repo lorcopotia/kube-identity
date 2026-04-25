@@ -4,15 +4,32 @@
 @theme {
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
   
-  --color-bento-bg: #f5f5f7;
+  /* Shared transitions */
+  --transition-speed: 300ms;
+  
+  /* Light Theme (Default) */
+  --color-bento-bg: #fbfbfd;
   --color-bento-card: #ffffff;
-  --color-bento-accent: #2563eb;
+  --color-bento-accent: #0071e3;
   --color-bento-text-main: #1d1d1f;
-  --color-bento-text-sec: #6e6e73;
-  --color-bento-border: #e5e7eb;
+  --color-bento-text-sec: #86868b;
+  --color-bento-border: #d2d2d7;
 }
 
 @layer base {
+  .dark {
+    --color-bento-bg: #000000;
+    --color-bento-card: #161617;
+    --color-bento-accent: #2997ff;
+    --color-bento-text-main: #f5f5f7;
+    --color-bento-text-sec: #a1a1a6;
+    --color-bento-border: #333336;
+  }
+
+  * {
+    @apply transition-colors duration-300;
+  }
+
   body {
     @apply bg-bento-bg text-bento-text-main font-sans antialiased;
   }
