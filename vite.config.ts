@@ -7,7 +7,7 @@ export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
   return {
     plugins: [react(), tailwindcss()],
-    base: process.env.NODE_ENV === 'production' ? '/<YOUR_REPO_NAME>/' : '/',
+    base: process.env.NODE_ENV === 'production' ? '/kube-identity/' : '/',
     resolve: {
       alias: {
         '@': path.resolve(__dirname, '.'),
