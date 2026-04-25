@@ -18,7 +18,10 @@ import {
   Settings,
   Code as CodeIcon,
   Terminal,
-  FileCode
+  FileCode,
+  ExternalLink,
+  Github,
+  Award
 } from "lucide-react";
 import yaml from "js-yaml";
 
@@ -561,6 +564,52 @@ export default function App() {
           )}
         </motion.section>
       </motion.div>
+
+      {/* NEW PROFESSIONAL FOOTER */}
+      <motion.footer 
+        variants={itemVariants}
+        initial="hidden"
+        animate="visible"
+        className="max-w-7xl mx-auto mt-12 mb-24 px-4 border-t border-bento-border pt-8 flex flex-col md:flex-row justify-between items-start gap-8"
+      >
+        <div className="space-y-4 max-w-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 bg-bento-text-main rounded-lg flex items-center justify-center text-white">
+              <ShieldCheck className="w-4 h-4" />
+            </div>
+            <span className="font-bold tracking-tight">KubeIdentity</span>
+          </div>
+          <p className="text-sm text-bento-text-sec leading-relaxed">
+            The professional standard for Kubernetes RBAC manifest generation. Built for speed, security, and precision.
+          </p>
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-widest text-bento-accent">
+            <Award className="w-3 h-3" />
+            <span>MIT Licensed Project</span>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-12 md:gap-24">
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-bento-text-sec">The Creator</h4>
+            <ul className="space-y-2 text-sm font-medium">
+              <li>
+                <a href="https://lorcopotia.github.io" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:text-bento-accent transition-colors group">
+                  Homepage <ExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100" />
+                </a>
+              </li>
+            </ul>
+          </div>
+          <div className="space-y-4">
+            <h4 className="text-xs font-bold uppercase tracking-widest text-bento-text-sec">Copyright & Legal</h4>
+            <div className="space-y-1">
+              <p className="text-sm font-medium">© {new Date().getFullYear()} lorcopotia</p>
+              <p className="text-[11px] text-bento-text-sec leading-tight">
+                All rights reserved. The KubeIdentity concept and implementation are protected under international copyright laws.
+              </p>
+            </div>
+          </div>
+        </div>
+      </motion.footer>
 
       {/* FOOTER NAV / SETTINGS */}
       <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/80 backdrop-blur-md border border-bento-border rounded-2xl px-4 py-3 shadow-2xl flex items-center gap-6 md:gap-10">
