@@ -1,20 +1,32 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# KubeIdentity
 
-# Run and deploy your AI Studio app
+KubeIdentity is a high-performance, real-time Kubernetes RBAC (Role-Based Access Control) generator designed to help cluster administrators manage permissions with precision and ease.
 
-This contains everything you need to run your app locally.
+## Purpose
 
-View your app in AI Studio: https://ai.studio/apps/faebcedf-4cf9-42f9-8f9c-efbc4a3b070a
+Managing Kubernetes permissions can be complex and error-prone. KubeIdentity provides a visual and interactive interface to:
+- Generate **ServiceAccounts**, **Roles**, and **RoleBindings**.
+- Support for both **Namespace-scoped** and **Cluster-wide** (ClusterRole) permissions.
+- **Real-time manifest generation**: See your YAML manifests update instantly as you configure rules.
+- **Security Audit**: Integrated logic to ensure your configurations comply with the **Principle of Least Privilege**.
+- **Interactive UI**: A modern, bento-style dashboard with support for dark mode.
 
-## Run Locally
+## Features
 
-**Prerequisites:**  Node.js
+- **Resource Selection**: Easily pick from common Kubernetes resources (Pods, Deployments, Secrets, etc.).
+- **Verb Mapping**: Map specific verbs (get, list, watch, create, etc.) to your rules.
+- **Metadata Management**: Add custom labels and maintain standard naming conventions.
+- **One-click Export**: Copy generated YAML directly to your clipboard for deployment.
+- **Theme Support**: Seamlessly switch between light and dark modes for the best editing experience.
 
+## Usage
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. **Identity Type**: Select whether you are creating a simple ServiceAccount or just the Role/Binding.
+2. **Basic Config**: Set your application name, namespace, and role details.
+3. **Labels**: Add necessary metadata labels.
+4. **Permissions**: Define the API groups, resources, and verbs allowed.
+5. **Review**: Check the visual YAML manifest and security audit insights.
+6. **Deploy**: Use the "Copy" button and apply the manifest to your cluster using `kubectl apply -f`.
+
+---
+Built for Kubernetes Administrators who value speed, security, and clean YAML.
